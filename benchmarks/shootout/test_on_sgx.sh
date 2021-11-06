@@ -39,7 +39,7 @@ gcc -O3 -o out/${bench}_native \
         -I../../include ${bench}.c main/main_${bench}.c main/my_libc.c
 
 cp -a ${bench}.c main/main_${bench}.c main/my_libc.c sgx-sample/Enclave/
-cd sgx-sample && make BENCH=${bench} && cd ..
+cd sgx-sample && make BENCH=${bench} clean && make BENCH=${bench} && cd ..
 rm -f sgx-sample/Enclave/${bench}.c
 rm -f sgx-sample/Enclave/main_${bench}.c
 rm -f sgx-sample/Enclave/my_libc.c
