@@ -7,9 +7,24 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define ARENA_SIZE ((size_t) 1000000)
+#if defined(STM32)
+#  define ARENA_SIZE ((size_t) 10000)
+#elif defined(ESP32)
+#  define ARENA_SIZE ((size_t) 2000)
+#else
+#  define ARENA_SIZE ((size_t) 1000000)
+#endif
+
 #define LEVEL_FIRST 1
-#define LEVEL_LAST 5
+
+#if defined(STM32) || defined(ESP32)
+#  define LEVEL_LAST 1
+#elif !defined(TEST_INTERPRETER)
+#  define LEVEL_LAST 5
+#else
+#  define LEVEL_LAST 1
+#endif
+
 #define LEVELS (LEVEL_LAST - LEVEL_FIRST + 1)
 #define HASH_ITERATIONS 1
 
@@ -198,13 +213,15 @@ hashseq_solve(HashSeqArena *arena, HashSeqSolution *solutions, const uint32_t su
     return 0;
 }
 
+static uint8_t buf_seqhash[ARENA_SIZE] = { 0 };
+
 static void
 seqhash_setup(void *global_ctx, void **ctx_p)
 {
     (void) global_ctx;
 
-    uint8_t *buf = calloc(ARENA_SIZE, (size_t) 1U);
-    assert(buf != NULL);
+    uint8_t *buf = buf_seqhash;//calloc(ARENA_SIZE, (size_t) 1U);
+    //assert(buf != NULL);
 
     *ctx_p = (void *) buf;
 }
@@ -212,7 +229,7 @@ seqhash_setup(void *global_ctx, void **ctx_p)
 static void
 seqhash_teardown(void *ctx)
 {
-    free(ctx);
+    //free(ctx);
 }
 
 void

@@ -5,7 +5,11 @@
 #include <stdint.h>
 #include <string.h>
 
+#ifndef TEST_INTERPRETER
 #define ITERATIONS 10000
+#else
+#define ITERATIONS 1000
+#endif
 
 #if defined(__SIZEOF_INT128__)
 typedef unsigned __int128 uint128_t;
@@ -1016,4 +1020,9 @@ ed25519_body(void *ctx_)
         a[31] &= 0x7f;
     }
     BLACK_BOX(a);
+
+    int res = 0;
+    for (i = 0; i < sizeof(a); i++)
+        res += a[i];
+    BLACK_BOX(res);
 }

@@ -1,12 +1,25 @@
 
 #include <sightglass.h>
 
-#include <assert.h>
+//#include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
 
-#define ITERATIONS 500
-#define LENGTH 2500
+#ifdef STM32
+#  define ITERATIONS 10
+#  define LENGTH 500
+#elif defined(ESP32)
+#  define ITERATIONS 2
+#  define LENGTH 500
+#elif !defined(TEST_INTERPRETER)
+#  define ITERATIONS 500
+#  define LENGTH 2500
+#else
+#  define ITERATIONS 800
+#  define LENGTH 600
+#endif
+
+static uint32_t x_buf[LENGTH] = { 0 };
 
 void
 switch2_body(void *ctx_)
@@ -16,8 +29,8 @@ switch2_body(void *ctx_)
     size_t length = LENGTH;
 
     uint32_t *x;
-    x = malloc(LENGTH * sizeof *x);
-    assert(x != NULL);
+    x = x_buf;//malloc(LENGTH * sizeof *x);
+    //assert(x != NULL);
 
     size_t i;
     for (i = (size_t) 0U; i < length; i++) {
@@ -25,7 +38,7 @@ switch2_body(void *ctx_)
     }
 
     int j;
-    for (j = 0; j < ITERATIONS; j++) {
+    for (j = 0; j < ITERATIONS * 200; j++) {
         BLACK_BOX(x);
         BLACK_BOX(length);
         for (i = (size_t) 0U; i < length; i++) {
@@ -633,6 +646,7 @@ switch2_body(void *ctx_)
             case 200:
                 x[i] ^= 3089;
 
+#if 0
             case 201:
                 x[i] ^= 3222;
 
@@ -3101,6 +3115,7 @@ switch2_body(void *ctx_)
 
             case 1023:
                 x[i] ^= 3307;
+#endif
 
             default:
                 x[i]++;
@@ -3111,5 +3126,11 @@ switch2_body(void *ctx_)
 
     BLACK_BOX(x);
 
-    free(x);
+    uint32_t res = 0;
+    for (i = 0; i < LENGTH; i++)
+        res ^= x[i];
+
+    BLACK_BOX(res);
+
+    //free(x);
 }

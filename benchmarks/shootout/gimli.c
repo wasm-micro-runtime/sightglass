@@ -3,7 +3,15 @@
 
 #include <stdint.h>
 
-#define ITERATIONS 10000
+#ifdef STM32
+#  define ITERATIONS 10000 * 1
+#elif defined(ESP32)
+#  define ITERATIONS 2000
+#elif !defined(TEST_INTERPRETER)
+#  define ITERATIONS 10000 * 100
+#else
+#  define ITERATIONS 10000 * 80
+#endif
 
 #define gimli_BLOCKBYTES 48
 #define ROTL32(x, b) (uint32_t)(((x) << (b)) | ((x) >> (32 - (b))))

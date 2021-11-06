@@ -1,5 +1,5 @@
 
-#include <sightglass.h>
+#include "sightglass.h"
 
 typedef struct Fib2Ctx_ {
     unsigned long n;
@@ -12,7 +12,15 @@ fib2_setup(void *global_ctx, void **ctx_p)
     (void) global_ctx;
 
     static Fib2Ctx ctx;
+#if defined(STM32)
+    ctx.n = 30;
+#elif defined(ESP32)
+    ctx.n = 26;
+#elif !defined(TEST_INTERPRETER)
     ctx.n = 42;
+#else
+    ctx.n = 38;
+#endif
 
     *ctx_p = (void *) &ctx;
 }

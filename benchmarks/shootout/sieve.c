@@ -3,7 +3,15 @@
 
 #include <stdlib.h>
 
-#define LENGTH 17000
+#ifdef STM32
+#  define LENGTH 30
+#elif defined(ESP32)
+#  define LENGTH 20
+#elif !defined(TEST_INTERPRETER)
+#  define LENGTH 17000
+#else
+#  define LENGTH 5500
+#endif
 
 typedef struct SieveCtx_ {
     unsigned long n;

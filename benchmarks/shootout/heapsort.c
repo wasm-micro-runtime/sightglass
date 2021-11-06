@@ -1,11 +1,22 @@
 
 #include <sightglass.h>
 
-#include <math.h>
+//#include <math.h>
 #include <stdlib.h>
 
-#define LENGTH 10000
-#define ITERATIONS 1000
+#ifdef STM32
+#  define LENGTH 1000
+#  define ITERATIONS 100
+#elif defined(ESP32)
+#  define LENGTH 200
+#  define ITERATIONS 20
+#elif !defined(TEST_INTERPRETER)
+#  define LENGTH 10000
+#  define ITERATIONS 1000
+#else
+#  define LENGTH 1000
+#  define ITERATIONS 4500
+#endif
 
 #define IM 139968
 #define IA 3877
@@ -71,13 +82,15 @@ heapsort_setup(void *global_ctx, void **ctx_p)
     *ctx_p = (void *) &ctx;
 }
 
+static double buf[LENGTH + 1] = { 0 };
 void
 heapsort_body(void *ctx_)
 {
     HeapSortCtx *ctx = (HeapSortCtx *) ctx_;
 
     int i, j;
-    ctx->ary = calloc(ctx->n + 1, sizeof *ctx->ary);
+    //ctx->ary = calloc(ctx->n + 1, sizeof *ctx->ary);
+    ctx->ary = buf;
     for (i = 0; i < ITERATIONS; i++) {
         BLACK_BOX(ctx->ary);
         BLACK_BOX(ctx->n);
@@ -88,5 +101,5 @@ heapsort_body(void *ctx_)
         ctx->res = ctx->ary[ctx->n];
         BLACK_BOX(ctx->res);
     }
-    free(ctx->ary);
+    //free(ctx->ary);
 }

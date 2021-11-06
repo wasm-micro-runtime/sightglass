@@ -1,12 +1,20 @@
 
 #include <sightglass.h>
 
-#include <assert.h>
-#include <errno.h>
+//#include <assert.h>
+//#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define ITERATIONS 10000
+#ifdef STM32
+#  define ITERATIONS 100
+#elif defined(ESP32)
+#  define ITERATIONS 20
+#elif !defined(TEST_INTERPRETER)
+#  define ITERATIONS 20000
+#else
+#  define ITERATIONS 10000
+#endif
 
 #define base64_ENCODED_LEN(BIN_LEN, VARIANT)                                                     \
     (((BIN_LEN) / 3U) * 4U +                                                                     \
@@ -126,7 +134,7 @@ bin2base64(char *const b64, const size_t b64_maxlen, const unsigned char *const 
             b64[b64_pos++] = (char) b64_byte_to_char((acc << (6 - acc_len)) & 0x3F);
         }
     }
-    assert(b64_pos <= b64_len);
+    //assert(b64_pos <= b64_len);
     while (b64_pos < b64_len) {
         b64[b64_pos++] = '=';
     }
@@ -137,6 +145,21 @@ bin2base64(char *const b64, const size_t b64_maxlen, const unsigned char *const 
     return b64;
 }
 
+static char *my_strchr(const char *s, int c)
+{
+    unsigned char ch = (unsigned char)c, ch1;
+    unsigned char *p = (unsigned char*)s;
+
+    if (!s)
+        return NULL;
+
+    while ((ch1 = *p++) != '\0')
+        if (ch1 == ch)
+            return (char*)p - 1;
+
+    return NULL;
+}
+
 static int
 _base642bin_skip_padding(const char *const b64, const size_t b64_len, size_t *const b64_pos_p,
                          const char *const ignore, size_t padding_len)
@@ -145,14 +168,14 @@ _base642bin_skip_padding(const char *const b64, const size_t b64_len, size_t *co
 
     while (padding_len > 0) {
         if (*b64_pos_p >= b64_len) {
-            errno = ERANGE;
+            //errno = ERANGE;
             return -1;
         }
         c = b64[*b64_pos_p];
         if (c == '=') {
             padding_len--;
-        } else if (ignore == NULL || strchr(ignore, c) == NULL) {
-            errno = EINVAL;
+        } else if (ignore == NULL || my_strchr(ignore, c) == NULL) {
+            //errno = EINVAL;
             return -1;
         }
         (*b64_pos_p)++;
@@ -184,7 +207,7 @@ base642bin(unsigned char *const bin, const size_t bin_maxlen, const char *const 
             d = b64_char_to_byte(c);
         }
         if (d == 0xFF) {
-            if (ignore != NULL && strchr(ignore, c) != NULL) {
+            if (ignore != NULL && my_strchr(ignore, c) != NULL) {
                 b64_pos++;
                 continue;
             }
@@ -195,7 +218,7 @@ base642bin(unsigned char *const bin, const size_t bin_maxlen, const char *const 
         if (acc_len >= 8) {
             acc_len -= 8;
             if (bin_pos >= bin_maxlen) {
-                errno = ERANGE;
+                //errno = ERANGE;
                 ret   = -1;
                 break;
             }
@@ -211,14 +234,14 @@ base642bin(unsigned char *const bin, const size_t bin_maxlen, const char *const 
     if (ret != 0) {
         bin_pos = (size_t) 0U;
     } else if (ignore != NULL) {
-        while (b64_pos < b64_len && strchr(ignore, b64[b64_pos]) != NULL) {
+        while (b64_pos < b64_len && my_strchr(ignore, b64[b64_pos]) != NULL) {
             b64_pos++;
         }
     }
     if (b64_end != NULL) {
         *b64_end = &b64[b64_pos];
     } else if (b64_pos != b64_len) {
-        errno = EINVAL;
+        //errno = EINVAL;
         ret   = -1;
     }
     if (bin_len != NULL) {
@@ -227,6 +250,9 @@ base642bin(unsigned char *const bin, const size_t bin_maxlen, const char *const 
     return ret;
 }
 
+static unsigned char bin_buf[1000] = { 0 };
+static char b64_buf[4096] = { 0 };
+
 void
 base64_body(void *ctx)
 {
@@ -234,8 +260,8 @@ base64_body(void *ctx)
 
     size_t         len     = 1000;
     size_t         b64_len = base64_encoded_len(len, 1);
-    unsigned char *bin     = calloc(len, 1);
-    char *         b64     = malloc(b64_len);
+    unsigned char *bin     = bin_buf;//calloc(len, 1);
+    char *         b64     = b64_buf;//malloc(b64_len);
 
     BLACK_BOX(len);
 
@@ -246,6 +272,9 @@ base64_body(void *ctx)
         base642bin(bin, len, b64, b64_len, NULL, NULL, NULL, 1);
     }
 
-    free(bin);
-    free(b64);
+    unsigned res = *(unsigned*)b64;
+    BLACK_BOX(res);
+
+    //free(bin);
+    //free(b64);
 }

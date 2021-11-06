@@ -1,12 +1,16 @@
 
 #include <sightglass.h>
 
-#include <assert.h>
+// #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
+#ifndef TEST_INTERPRETER
 #define STR_SIZE 10000
-#define ITERATIONS 10
+#else
+#define STR_SIZE 1000
+#endif
+#define ITERATIONS 200
 
 typedef struct MemmoveCtx_ {
     char * str;
@@ -25,6 +29,8 @@ memmove_setup(void *global_ctx, void **ctx_p)
     *ctx_p = (void *) &ctx;
 }
 
+static char str_buf[STR_SIZE];
+
 void
 memmove_body(void *ctx_)
 {
@@ -32,8 +38,9 @@ memmove_body(void *ctx_)
     int         i;
     size_t      j;
 
-    ctx->str = calloc(ctx->str_size, (size_t) 1U);
-    assert(ctx->str != NULL);
+    //ctx->str = calloc(ctx->str_size, (size_t) 1U);
+    ctx->str = str_buf;
+    // assert(ctx->str != NULL);
 
     for (i = 0; i < ITERATIONS; i++) {
         BLACK_BOX(ctx->str);
@@ -47,5 +54,5 @@ memmove_body(void *ctx_)
 
     ctx->ret = ctx->str[0];
     BLACK_BOX(ctx->str);
-    free(ctx->str);
+    //free(ctx->str);
 }

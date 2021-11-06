@@ -3,7 +3,15 @@
 
 #include <stdlib.h>
 
-#define LENGTH 30
+#ifdef STM32
+#  define LENGTH 10
+#elif defined(ESP32)
+#  define LENGTH 2
+#elif !defined(TEST_INTERPRETER)
+#  define LENGTH 40
+#else
+#  define LENGTH 20
+#endif
 
 typedef struct NestedLoop2Ctx_ {
     int n;
@@ -38,7 +46,7 @@ nestedloop2_body(void *ctx_)
                 for (d = 3; d < n; d++) {
                     for (e = 4; e < n; e++) {
                         for (f = 5; f < n; f++) {
-                            x++;
+                            x += (a + b + c) * (d + e) * (x + 10);
                         }
                     }
                 }

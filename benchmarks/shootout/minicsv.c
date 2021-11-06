@@ -6,7 +6,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifndef TEST_INTERPRETER
 #define ITERATIONS 1000000
+#else
+#define ITERATIONS 100000
+#endif
 
 #define MINICSV_DELIM ','
 #define MINICSV_QUOTE '"'
@@ -87,6 +91,18 @@ minicsv_parse_line(char *const buf, char **const cols, size_t *const cols_count_
     return pos;
 }
 
+static int
+my_isspace(int c)
+{
+    if (c == '\f'
+        || c == '\n'
+        || c == '\r'
+        || c == '\t'
+        || c == '\v')
+        return 1;
+    return 0;
+}
+
 static void
 minicsv_trim_cols(char **const cols, const size_t cols_count)
 {
@@ -96,11 +112,11 @@ minicsv_trim_cols(char **const cols, const size_t cols_count)
 
     while (i < cols_count) {
         col = cols[i];
-        while (*col != 0 && isspace((int) (unsigned char) *col)) {
+        while (*col != 0 && my_isspace((int) (unsigned char) *col)) {
             cols[i] = ++col;
         }
         col_end = strlen(col);
-        while (col_end > (size_t) 0U && isspace((int) (unsigned char) col[--col_end])) {
+        while (col_end > (size_t) 0U && my_isspace((int) (unsigned char) col[--col_end])) {
             col[col_end] = 0;
         }
         i++;
@@ -124,16 +140,19 @@ minicsv_body(void *ctx_)
         BLACK_BOX(buf);
         r = minicsv_parse_line(r, cols, &cols_count, sizeof cols / sizeof cols[0]);
         if (cols_count > sizeof cols / sizeof cols[0]) {
-            abort();
+            //abort();
+            return;
         }
         minicsv_trim_cols(cols, cols_count);
         BLACK_BOX(cols);
         r = minicsv_parse_line(r, cols, &cols_count, sizeof cols / sizeof cols[0]);
         if (cols_count > sizeof cols / sizeof cols[0]) {
-            abort();
+            //abort();
+            return;
         }
         minicsv_trim_cols(cols, cols_count);
         BLACK_BOX(cols_count);
         BLACK_BOX(r);
     }
+    BLACK_BOX(cols_count);
 }
