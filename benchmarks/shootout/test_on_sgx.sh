@@ -38,6 +38,12 @@ gcc -O3 -o out/${bench}_native \
         -Dbench=${bench} -DDUMP_RESULT -DDUMP_TIME_ELAPSE \
         -I../../include ${bench}.c main/main_${bench}.c main/my_libc.c
 
+cp -a ${bench}.c main/main_${bench}.c main/my_libc.c sgx-sample/Enclave/
+cd sgx-sample && make BENCH=${bench} && cd ..
+rm -f sgx-sample/Enclave/${bench}.c
+rm -f sgx-sample/Enclave/main_${bench}.c
+rm -f sgx-sample/Enclave/my_libc.c
+
 /opt/wasi-sdk/bin/clang -O3 -nostdlib \
         -Wno-unknown-attributes \
         -Dblack_box=set_res \
@@ -53,6 +59,10 @@ ${WAMRC} -sgx -o out/${bench}.aot out/${bench}.wasm
 echo ""
 echo "run with gcc native .."
 ./out/${bench}_native
+
+echo ""
+echo "run with sgx native .."
+./sgx-sample/sgx_sample
 
 echo ""
 echo "run with iwasm aot .."
