@@ -47,6 +47,7 @@ rm -f sgx-sample/Enclave/${bench}.c
 rm -f sgx-sample/Enclave/main_${bench}.c
 rm -f sgx-sample/Enclave/my_libc.c
 
+#memset: aot不加-nostlib, -Wl,--no-entry，然后加一下-msimd128
 /opt/wasi-sdk/bin/clang -O3 -nostdlib \
         -Wno-unknown-attributes \
         -Dblack_box=set_res \
@@ -80,5 +81,5 @@ echo "run with iwasm interpreter .."
 ${IWASM} --stack-size=1024000 out/${bench}.wasm
 
 echo ""
-echo "run with iwasm interpreter .."
+echo "run with iwasm fast interpreter .."
 ${IWASM_FAST_INTERPRETER} --stack-size=1024000 out/${bench}.wasm
