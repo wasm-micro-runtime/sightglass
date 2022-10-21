@@ -20,7 +20,7 @@ benchmarks = [
 
 def main():
 
-    os.system("./test_build_iwasm.sh")
+    os.system("./build_iwasm_sgx.sh")
 
     for benchmark in benchmarks:
         ret_code = os.system(
