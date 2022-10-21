@@ -94,7 +94,7 @@ else
 endif
 Crypto_Library_Name := sgx_tcrypto
 
-Enclave_C_Files := Enclave/$(bench).c Enclave/main_$(bench).c Enclave/my_libc.c
+Enclave_C_Files := Enclave/$(bench).c Enclave/main_$(bench).c
 
 Enclave_Cpp_Files := Enclave/Enclave.cpp
 

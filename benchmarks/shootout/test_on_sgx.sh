@@ -18,8 +18,18 @@ if [[ -z $(which ${WAMR_DIR}/wamr-compiler/build/wamrc) ]]; then
     exit 1
 fi
 
-if [[ -z $(which ${WAMR_DIR}/product-mini/platforms/linux-sgx/enclave-sample/iwasm) ]]; then
+if [[ -z $(which ${WAMR_DIR}/product-mini/platforms/linux-sgx-1/enclave-sample/iwasm) ]]; then
     echo "Please build iwasm on linux-sgx platform firstly"
+    exit 1
+fi
+
+if [[ -z $(which ${WAMR_DIR}/product-mini/platforms/linux-sgx-2/enclave-sample/iwasm_fast_jit) ]]; then
+    echo "Please build iwasm fast jit on linux-sgx platform firstly"
+    exit 1
+fi
+
+if [[ -z $(which ${WAMR_DIR}/product-mini/platforms/linux-sgx-3/enclave-sample/iwasm_fast_interp) ]]; then
+    echo "Please build iwasm fast interp on linux-sgx platform firstly"
     exit 1
 fi
 
@@ -29,7 +39,7 @@ if [[ -z $(which /opt/wasi-sdk/bin/clang) ]]; then
 fi
 
 WAMRC=${WAMR_DIR}/wamr-compiler/build/wamrc
-IWASM=${WAMR_DIR}/product-mini/platforms/linux-sgx/enclave-sample/iwasm
+IWASM=${WAMR_DIR}/product-mini/platforms/linux-sgx-1/enclave-sample/iwasm
 IWASM_FAST_JIT=${WAMR_DIR}/product-mini/platforms/linux-sgx-2/enclave-sample/iwasm_fast_jit
 IWASM_FAST_INTERPRETER=${WAMR_DIR}/product-mini/platforms/linux-sgx-3/enclave-sample/iwasm_fast_interp
 
@@ -38,14 +48,13 @@ mkdir -p out
 gcc -O3 -o out/${bench}_native \
         -Dblack_box=set_res \
         -Dbench=${bench} -DDUMP_RESULT -DDUMP_TIME_ELAPSE \
-        -I../../include ${bench}.c main/main_${bench}.c main/my_libc.c
+        -I../../include ${bench}.c main/main_${bench}.c
 
-cp -a ${bench}.c main/main_${bench}.c main/my_libc.c sgx-sample/Enclave/
-cd sgx-sample && make BENCH=${bench} clean && make BENCH=${bench} 
+cp -a ${bench}.c main/main_${bench}.c sgx-sample/Enclave/
+cd sgx-sample && make BENCH=${bench} clean && make BENCH=${bench}
 cd ..
 rm -f sgx-sample/Enclave/${bench}.c
 rm -f sgx-sample/Enclave/main_${bench}.c
-rm -f sgx-sample/Enclave/my_libc.c
 
 #memset: aot不加-nostlib, -Wl,--no-entry，然后加一下-msimd128
 /opt/wasi-sdk/bin/clang -O3 -nostdlib \
@@ -56,7 +65,7 @@ rm -f sgx-sample/Enclave/my_libc.c
         -Wl,--export=main -Wl,--export=__main_argc_argv \
         -Wl,--strip-all,--no-entry,--allow-undefined \
         -o out/${bench}.wasm \
-        ${bench}.c main/main_${bench}.c main/my_libc.c
+        ${bench}.c main/main_${bench}.c
 
 ${WAMRC} -sgx -o out/${bench}.aot out/${bench}.wasm
 
