@@ -2,19 +2,19 @@ import os
 
 benchmarks = [
     "base64",
-    # "fib2",
-    # "gimli",
-    # "heapsort",
-    # "matrix",
-    # "memmove",
-    # "nestedloop",
-    # "nestedloop2",
-    # "nestedloop3",
-    # "random",
-    # "seqhash",
-    # "sieve",
-    # "strchr",
-    # "switch2",
+    "fib2",
+    "gimli",
+    "heapsort",
+    "matrix",
+    "memmove",
+    "nestedloop",
+    "nestedloop2",
+    "nestedloop3",
+    "random",
+    "seqhash",
+    "sieve",
+    "strchr",
+    "switch2",
 ]
 
 

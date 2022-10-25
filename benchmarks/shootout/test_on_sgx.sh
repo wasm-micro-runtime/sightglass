@@ -18,18 +18,23 @@ if [[ -z $(which ${WAMR_DIR}/wamr-compiler/build/wamrc) ]]; then
     exit 1
 fi
 
-if [[ -z $(which ${WAMR_DIR}/product-mini/platforms/linux-sgx-1/enclave-sample/iwasm) ]]; then
-    echo "Please build iwasm on linux-sgx platform firstly"
+if [[ -z $(which ${WAMR_DIR}/product-mini/platforms/linux-sgx-classic-interp/enclave-sample/iwasm) ]]; then
+    echo "Please build iwasm classic interp on linux-sgx platform firstly"
     exit 1
 fi
 
-if [[ -z $(which ${WAMR_DIR}/product-mini/platforms/linux-sgx-2/enclave-sample/iwasm_fast_jit) ]]; then
-    echo "Please build iwasm fast jit on linux-sgx platform firstly"
-    exit 1
-fi
-
-if [[ -z $(which ${WAMR_DIR}/product-mini/platforms/linux-sgx-3/enclave-sample/iwasm_fast_interp) ]]; then
+if [[ -z $(which ${WAMR_DIR}/product-mini/platforms/linux-sgx-fast-interp/enclave-sample/iwasm_fast_interp) ]]; then
     echo "Please build iwasm fast interp on linux-sgx platform firstly"
+    exit 1
+fi
+
+if [[ -z $(which ${WAMR_DIR}/product-mini/platforms/linux-sgx-aot/enclave-sample/iwasm_aot) ]]; then
+    echo "Please build iwasm aot on linux-sgx platform firstly"
+    exit 1
+fi
+
+if [[ -z $(which ${WAMR_DIR}/product-mini/platforms/linux-sgx-fast-jit/enclave-sample/iwasm_fast_jit) ]]; then
+    echo "Please build iwasm fast jit on linux-sgx platform firstly"
     exit 1
 fi
 
@@ -39,9 +44,10 @@ if [[ -z $(which /opt/wasi-sdk/bin/clang) ]]; then
 fi
 
 WAMRC=${WAMR_DIR}/wamr-compiler/build/wamrc
-IWASM=${WAMR_DIR}/product-mini/platforms/linux-sgx-1/enclave-sample/iwasm
-IWASM_FAST_JIT=${WAMR_DIR}/product-mini/platforms/linux-sgx-2/enclave-sample/iwasm_fast_jit
-IWASM_FAST_INTERPRETER=${WAMR_DIR}/product-mini/platforms/linux-sgx-3/enclave-sample/iwasm_fast_interp
+IWASM_AOT=${WAMR_DIR}/product-mini/platforms/linux-sgx-aot/enclave-sample/iwasm_aot
+IWASM_FAST_JIT=${WAMR_DIR}/product-mini/platforms/linux-sgx-fast-jit/enclave-sample/iwasm_fast_jit
+IWASM_INTERP=${WAMR_DIR}/product-mini/platforms/linux-sgx-classic-interp/enclave-sample/iwasm
+IWASM_FAST_INTERPRETER=${WAMR_DIR}/product-mini/platforms/linux-sgx-fast-interp/enclave-sample/iwasm_fast_interp
 
 mkdir -p out
 
@@ -56,7 +62,7 @@ cd ..
 rm -f sgx-sample/Enclave/${bench}.c
 rm -f sgx-sample/Enclave/main_${bench}.c
 
-#memset: aot不加-nostlib, -Wl,--no-entry，然后加一下-msimd128
+#when test memset: aot remove flags "-nostlib, -Wl,--no-entry," then add flag "-msimd128"
 /opt/wasi-sdk/bin/clang -O3 -nostdlib \
         -Wno-unknown-attributes \
         -Dblack_box=set_res \
@@ -79,15 +85,15 @@ echo "run with sgx native .."
 
 echo ""
 echo "run with iwasm aot .."
-${IWASM} out/${bench}.aot
+${IWASM_AOT} out/${bench}.aot
 
 echo ""
 echo "run with iwasm fast jit.."
 ${IWASM_FAST_JIT} --stack-size=1024000 out/${bench}.wasm
 
 echo ""
-echo "run with iwasm interpreter .."
-${IWASM} --stack-size=1024000 out/${bench}.wasm
+echo "run with iwasm classic interpreter .."
+${IWASM_INTERP} --stack-size=1024000 out/${bench}.wasm
 
 echo ""
 echo "run with iwasm fast interpreter .."

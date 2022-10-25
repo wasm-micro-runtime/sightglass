@@ -4,7 +4,7 @@
 
    ```sh
    # set WAMR Directory
-   export WAMR_DIR={your clone directory}/wasm-micro-runtime
+   export WAMR_DIR=<wamr_root_dir>/wasm-micro-runtime
    # set sgx sdk environment
    source /opt/intel/sgxsdk/environment
    ```

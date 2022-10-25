@@ -1,4 +1,5 @@
 # clean iwasms
-sudo rm -r ${WAMR_DIR}/product-mini/platforms/linux-sgx-1
-sudo rm -r ${WAMR_DIR}/product-mini/platforms/linux-sgx-2
-sudo rm -r ${WAMR_DIR}/product-mini/platforms/linux-sgx-3
+rm -r ${WAMR_DIR}/product-mini/platforms/linux-sgx-classic-interp
+rm -r ${WAMR_DIR}/product-mini/platforms/linux-sgx-fast-interp
+rm -r ${WAMR_DIR}/product-mini/platforms/linux-sgx-aot
+rm -r ${WAMR_DIR}/product-mini/platforms/linux-sgx-fast-jit
