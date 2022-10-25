@@ -7,11 +7,11 @@ cp -r ${WAMR_DIR}/product-mini/platforms/linux-sgx  ${WAMR_DIR}/product-mini/pla
 cd ${WAMR_DIR}/product-mini/platforms/linux-sgx-classic-interp
 rm -r build
 mkdir build && cd build
-# build iwasm with interpreter
+# build iwasm with classic-interpreter
 cmake .. -DWAMR_BUILD_FAST_INTERP=0 -DWAMR_BUILD_AOT=0
 make
 cd ../enclave-sample
-make
+make clean && make
 
 cd ${WAMR_DIR}/product-mini/platforms/linux-sgx-fast-interp
 rm -r build
@@ -20,8 +20,7 @@ mkdir build && cd build
 cmake .. -DWAMR_BUILD_AOT=0
 make
 cd ../enclave-sample
-make
-cp iwasm iwasm_fast_interp
+make clean && make
 
 cd ${WAMR_DIR}/product-mini/platforms/linux-sgx-aot
 rm -r build
@@ -30,8 +29,7 @@ mkdir build && cd build
 cmake .. -DWAMR_BUILD_INTERP=0 -DWAMR_BUILD_FAST_INTERP=0
 make
 cd ../enclave-sample
-make
-cp iwasm iwasm_aot
+make clean && make
 
 cd ${WAMR_DIR}/product-mini/platforms/linux-sgx-fast-jit
 rm -r build
@@ -40,6 +38,4 @@ mkdir build && cd build
 cmake .. -DWAMR_BUILD_FAST_JIT=1 -DWAMR_BUILD_AOT=0
 make
 cd ../enclave-sample
-make
-cp iwasm iwasm_fast_jit
-
+make clean && make

@@ -23,17 +23,17 @@ if [[ -z $(which ${WAMR_DIR}/product-mini/platforms/linux-sgx-classic-interp/enc
     exit 1
 fi
 
-if [[ -z $(which ${WAMR_DIR}/product-mini/platforms/linux-sgx-fast-interp/enclave-sample/iwasm_fast_interp) ]]; then
+if [[ -z $(which ${WAMR_DIR}/product-mini/platforms/linux-sgx-fast-interp/enclave-sample/iwasm) ]]; then
     echo "Please build iwasm fast interp on linux-sgx platform firstly"
     exit 1
 fi
 
-if [[ -z $(which ${WAMR_DIR}/product-mini/platforms/linux-sgx-aot/enclave-sample/iwasm_aot) ]]; then
+if [[ -z $(which ${WAMR_DIR}/product-mini/platforms/linux-sgx-aot/enclave-sample/iwasm) ]]; then
     echo "Please build iwasm aot on linux-sgx platform firstly"
     exit 1
 fi
 
-if [[ -z $(which ${WAMR_DIR}/product-mini/platforms/linux-sgx-fast-jit/enclave-sample/iwasm_fast_jit) ]]; then
+if [[ -z $(which ${WAMR_DIR}/product-mini/platforms/linux-sgx-fast-jit/enclave-sample/iwasm) ]]; then
     echo "Please build iwasm fast jit on linux-sgx platform firstly"
     exit 1
 fi
@@ -44,10 +44,10 @@ if [[ -z $(which /opt/wasi-sdk/bin/clang) ]]; then
 fi
 
 WAMRC=${WAMR_DIR}/wamr-compiler/build/wamrc
-IWASM_AOT=${WAMR_DIR}/product-mini/platforms/linux-sgx-aot/enclave-sample/iwasm_aot
-IWASM_FAST_JIT=${WAMR_DIR}/product-mini/platforms/linux-sgx-fast-jit/enclave-sample/iwasm_fast_jit
-IWASM_INTERP=${WAMR_DIR}/product-mini/platforms/linux-sgx-classic-interp/enclave-sample/iwasm
-IWASM_FAST_INTERPRETER=${WAMR_DIR}/product-mini/platforms/linux-sgx-fast-interp/enclave-sample/iwasm_fast_interp
+IWASM_AOT=${WAMR_DIR}/product-mini/platforms/linux-sgx-aot/enclave-sample/iwasm
+IWASM_FAST_JIT=${WAMR_DIR}/product-mini/platforms/linux-sgx-fast-jit/enclave-sample/iwasm
+IWASM_CLASSIC_INTERP=${WAMR_DIR}/product-mini/platforms/linux-sgx-classic-interp/enclave-sample/iwasm
+IWASM_FAST_INTERPR=${WAMR_DIR}/product-mini/platforms/linux-sgx-fast-interp/enclave-sample/iwasm
 
 mkdir -p out
 
@@ -93,8 +93,8 @@ ${IWASM_FAST_JIT} --stack-size=1024000 out/${bench}.wasm
 
 echo ""
 echo "run with iwasm classic interpreter .."
-${IWASM_INTERP} --stack-size=1024000 out/${bench}.wasm
+${IWASM_CLASSIC_INTERP} --stack-size=1024000 out/${bench}.wasm
 
 echo ""
 echo "run with iwasm fast interpreter .."
-${IWASM_FAST_INTERPRETER} --stack-size=1024000 out/${bench}.wasm
+${IWASM_FAST_INTERPR} --stack-size=1024000 out/${bench}.wasm
