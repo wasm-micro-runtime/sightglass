@@ -20,11 +20,24 @@ benchmarks = [
 
 def main():
 
+    report_file = "report.txt"
+
+    # remove result from last run(if exist) and set table head
+    os.system("rm {}".format(report_file))
+    os.system(
+        "echo \"\tsgx-native\tiwasm-aot\tiwasm-fast-jit\tiwasm-interp\tiwasm-fast-interp\" >> {}".format(
+            report_file
+        )
+    )
+
+    # start test
     os.system("./build_iwasm_sgx.sh")
 
     for benchmark in benchmarks:
         ret_code = os.system(
-            "./test_on_sgx.sh {bench} > {bench}.txt".format(bench=benchmark)
+            "./test_on_sgx.sh {bench} {result_file}".format(
+                bench=benchmark, result_file=report_file
+            )
         )
         if ret_code:
             print(
@@ -32,7 +45,7 @@ def main():
                     bench=benchmark, ret_code=ret_code
                 )
             )
-    
+
     os.system("./test_cleanup.sh")
 
 

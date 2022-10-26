@@ -1,11 +1,16 @@
 #!/bin/bash
 mkdir -p out
 
-export bench=$1
+export bench=$1 REPORT=$2
 
 if [[ -z $bench ]]; then
     echo "Please input benchmark name"
-    exit 1;
+    exit 1
+fi
+
+if [[ -z $REPORT ]]; then
+    echo "Please input file name for report"
+    exit 1
 fi
 
 if [[ ! ${WAMR_DIR} ]]; then
@@ -52,9 +57,9 @@ IWASM_FAST_INTERPR=${WAMR_DIR}/product-mini/platforms/linux-sgx-fast-interp/encl
 mkdir -p out
 
 gcc -O3 -o out/${bench}_native \
-        -Dblack_box=set_res \
-        -Dbench=${bench} -DDUMP_RESULT -DDUMP_TIME_ELAPSE \
-        -I../../include ${bench}.c main/main_${bench}.c
+    -Dblack_box=set_res \
+    -Dbench=${bench} -DDUMP_RESULT -DDUMP_TIME_ELAPSE \
+    -I../../include ${bench}.c main/main_${bench}.c
 
 cp -a ${bench}.c main/main_${bench}.c sgx-sample/Enclave/
 cd sgx-sample && make BENCH=${bench} clean && make BENCH=${bench}
@@ -64,37 +69,45 @@ rm -f sgx-sample/Enclave/main_${bench}.c
 
 #when test memset: aot remove flags "-nostlib, -Wl,--no-entry," then add flag "-msimd128"
 /opt/wasi-sdk/bin/clang -O3 -nostdlib \
-        -Wno-unknown-attributes \
-        -Dblack_box=set_res \
-        -I../../include -DDUMP_RESULT -DDUMP_TIME_ELAPSE \
-        -Wl,--initial-memory=1310720 \
-        -Wl,--export=main -Wl,--export=__main_argc_argv \
-        -Wl,--strip-all,--no-entry,--allow-undefined \
-        -o out/${bench}.wasm \
-        ${bench}.c main/main_${bench}.c
+    -Wno-unknown-attributes \
+    -Dblack_box=set_res \
+    -I../../include -DDUMP_RESULT -DDUMP_TIME_ELAPSE \
+    -Wl,--initial-memory=1310720 \
+    -Wl,--export=main -Wl,--export=__main_argc_argv \
+    -Wl,--strip-all,--no-entry,--allow-undefined \
+    -o out/${bench}.wasm \
+    ${bench}.c main/main_${bench}.c
 
 ${WAMRC} -sgx -o out/${bench}.aot out/${bench}.wasm
 
-echo ""
-echo "run with gcc native .."
-./out/${bench}_native
+function print_bench_name() {
+    name=$1
+    echo -en "$name" >>$REPORT
+}
+
+print_bench_name ${bench}
 
 echo ""
 echo "run with sgx native .."
-./sgx-sample/sgx_sample
+echo -en "\t" >>$REPORT
+./sgx-sample/sgx_sample | grep "time elapse: .* ms" | awk -F ' ' '{printf $3/1000}' >>$REPORT
 
 echo ""
 echo "run with iwasm aot .."
-${IWASM_AOT} out/${bench}.aot
+echo -en "\t" >>$REPORT
+${IWASM_AOT} out/${bench}.aot 2>&1 | grep "time elapse: .* ms" | awk -F ' ' '{printf $3/1000}' >>$REPORT
 
 echo ""
 echo "run with iwasm fast jit.."
-${IWASM_FAST_JIT} --stack-size=1024000 out/${bench}.wasm
+echo -en "\t" >>$REPORT
+${IWASM_FAST_JIT} --stack-size=1024000 out/${bench}.wasm 2>&1 | grep "time elapse: .* ms" | awk -F ' ' '{printf $3/1000}' >>$REPORT
 
 echo ""
 echo "run with iwasm classic interpreter .."
-${IWASM_CLASSIC_INTERP} --stack-size=1024000 out/${bench}.wasm
+echo -en "\t" >>$REPORT
+${IWASM_CLASSIC_INTERP} --stack-size=1024000 out/${bench}.wasm 2>&1 | grep "time elapse: .* ms" | awk -F ' ' '{printf $3/1000}' >>$REPORT
 
 echo ""
 echo "run with iwasm fast interpreter .."
-${IWASM_FAST_INTERPR} --stack-size=1024000 out/${bench}.wasm
+echo -en "\t" >>$REPORT
+${IWASM_FAST_INTERPR} --stack-size=1024000 out/${bench}.wasm 2>&1 | grep "time elapse: .* ms" | awk -F ' ' '{print $3/1000}' >>$REPORT

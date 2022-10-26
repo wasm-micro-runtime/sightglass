@@ -9,7 +9,7 @@ rm -r build
 mkdir build && cd build
 # build iwasm with classic-interpreter
 cmake .. -DWAMR_BUILD_FAST_INTERP=0 -DWAMR_BUILD_AOT=0
-make
+make -j ${nproc}
 cd ../enclave-sample
 make clean && make
 
@@ -18,7 +18,7 @@ rm -r build
 mkdir build && cd build
 # build iwasm with fast-interpreter
 cmake .. -DWAMR_BUILD_AOT=0
-make
+make -j ${nproc}
 cd ../enclave-sample
 make clean && make
 
@@ -27,7 +27,7 @@ rm -r build
 mkdir build && cd build
 # build iwasm with aot
 cmake .. -DWAMR_BUILD_INTERP=0 -DWAMR_BUILD_FAST_INTERP=0
-make
+make -j ${nproc}
 cd ../enclave-sample
 make clean && make
 
@@ -36,6 +36,6 @@ rm -r build
 mkdir build && cd build
 # build iwasm with fast-jit
 cmake .. -DWAMR_BUILD_FAST_JIT=1 -DWAMR_BUILD_AOT=0
-make
+make -j ${nproc}
 cd ../enclave-sample
 make clean && make
