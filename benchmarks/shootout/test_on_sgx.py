@@ -25,7 +25,7 @@ def main():
     # remove result from last run(if exist) and set table head
     os.system("rm {}".format(report_file))
     os.system(
-        "echo \"\tsgx-native\tiwasm-aot\tiwasm-fast-jit\tiwasm-interp\tiwasm-fast-interp\" >> {}".format(
+        "echo \"\tsgx-native\tiwasm-aot\tiwasm-fast-jit\tiwasm-classic-interp\tiwasm-fast-interp\" >> {}".format(
             report_file
         )
     )
